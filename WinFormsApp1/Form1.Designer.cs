@@ -59,7 +59,7 @@
             MinimizeBox = false;
             MinimumSize = new Size(64, 64);
             Name = "Form1";
-            Opacity = 0.7D;
+            Opacity = 0.9D;
             ShowIcon = false;
             StartPosition = FormStartPosition.CenterScreen;
             TopMost = true;

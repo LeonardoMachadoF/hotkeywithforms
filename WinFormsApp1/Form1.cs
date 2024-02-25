@@ -35,7 +35,10 @@ namespace WinFormsApp1
                 {
                     StartTimer("17-5", TimeSpan.FromMinutes(1));
                 }
-
+                if(GetAsyncKeyState(0x72) < 0) // F3
+                {
+                    ResetTimers();
+                }
                 await Task.Delay(20);
             }
 
@@ -72,6 +75,21 @@ namespace WinFormsApp1
                     });
                 }
             }
+
+            void ResetTimers()
+            {
+                foreach(var timerState in runningTimers)
+                {
+                    timerState.Timer.Change(Timeout.Infinite, Timeout.Infinite);
+                    timerState.Timer.Dispose();
+                }
+                runningTimers.Clear();
+
+                label1.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    label1.Text = "R";
+                });
+            }
         }
 
         private void label1_Click_2(object sender, EventArgs e)
@@ -97,6 +115,5 @@ namespace WinFormsApp1
             return runningTimers.Any(t => t.Message == message);
         }
 
-        
     }
 }
