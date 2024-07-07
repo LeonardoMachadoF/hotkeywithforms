@@ -1,4 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace WinFormsApp1
 {
@@ -7,21 +13,6 @@ namespace WinFormsApp1
         public Form1()
         {
             InitializeComponent();
-        }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label1_Click_1(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
         }
 
         async private void Form1_Load(object sender, EventArgs e)
@@ -33,21 +24,28 @@ namespace WinFormsApp1
             {
                 if(GetAsyncKeyState(0x11) < 0 || GetAsyncKeyState(0x70) < 0) // Ctrl e F1
                 {
-                    StartTimer("17-5", TimeSpan.FromMinutes(1));
+                    StartTimer("17-5", TimeSpan.FromMinutes(1), label1);
+                }
+                if(GetAsyncKeyState(0x35) < 0) // 5
+                {
+                    StartTimer("15-5", TimeSpan.FromSeconds(30), label2);
                 }
                 if(GetAsyncKeyState(0x72) < 0) // F3
                 {
-                    ResetTimers();
+                    ResetTimers("17-5");
+                }
+                if(GetAsyncKeyState(0x73) < 0) // F4
+                {
+                    ResetTimers("15-5");
                 }
                 await Task.Delay(20);
             }
 
-            void StartTimer(string message, TimeSpan duration)
+            void StartTimer(string message, TimeSpan duration, Label label)
             {
                 if(!IsTimerRunning(message))
                 {
-                    Console.WriteLine($"Start {message}");
-                    TimerState timerState = new TimerState(message, DateTime.Now.Add(duration));
+                    TimerState timerState = new TimerState(message, DateTime.Now.Add(duration), label);
                     timerState.Timer = new System.Threading.Timer(TimerCallback, timerState, 0, 1000);
                     runningTimers.Add(timerState);
                 }
@@ -57,10 +55,10 @@ namespace WinFormsApp1
             {
                 var timerState = (TimerState)state;
                 TimeSpan remainingTime = timerState.EndTime - DateTime.Now;
-                label1.BeginInvoke((MethodInvoker)delegate ()
+                timerState.Label.BeginInvoke((MethodInvoker)delegate ()
                 {
-                    string secondsRemaining = remainingTime.Seconds.ToString("D2");
-                    label1.Text = secondsRemaining; 
+                    string secondsRemaining = ((int)remainingTime.TotalSeconds).ToString("D");
+                    timerState.Label.Text = secondsRemaining;
                 });
 
                 if(remainingTime.TotalSeconds <= 0)
@@ -69,43 +67,42 @@ namespace WinFormsApp1
                     timerState.Timer.Change(Timeout.Infinite, Timeout.Infinite); // Parar o temporizador
                     timerState.Timer.Dispose(); // Liberar recursos do temporizador
                     runningTimers.Remove(timerState); // Remover o temporizador da lista de temporizadores em execução
-                    label1.BeginInvoke((MethodInvoker)delegate ()
+                    timerState.Label.BeginInvoke((MethodInvoker)delegate ()
                     {
-                        label1.Text = "R";
+                        timerState.Label.Text = "R";
                     });
                 }
             }
 
-            void ResetTimers()
+            void ResetTimers(string message)
             {
-                foreach(var timerState in runningTimers)
+                var timersToReset = runningTimers.Where(t => t.Message == message).ToList();
+                foreach(var timerState in timersToReset)
                 {
                     timerState.Timer.Change(Timeout.Infinite, Timeout.Infinite);
                     timerState.Timer.Dispose();
-                }
-                runningTimers.Clear();
+                    runningTimers.Remove(timerState);
 
-                label1.BeginInvoke((MethodInvoker)delegate ()
-                {
-                    label1.Text = "R";
-                });
+                    timerState.Label.BeginInvoke((MethodInvoker)delegate ()
+                    {
+                        timerState.Label.Text = "R";
+                    });
+                }
             }
         }
 
-        private void label1_Click_2(object sender, EventArgs e)
-        {
-
-        }
         class TimerState
         {
             public string Message { get; }
             public DateTime EndTime { get; }
             public System.Threading.Timer Timer { get; set; }
+            public Label Label { get; }
 
-            public TimerState(string message, DateTime endTime)
+            public TimerState(string message, DateTime endTime, Label label)
             {
                 Message = message;
                 EndTime = endTime;
+                Label = label;
             }
         }
 
@@ -114,6 +111,5 @@ namespace WinFormsApp1
         {
             return runningTimers.Any(t => t.Message == message);
         }
-
     }
 }
