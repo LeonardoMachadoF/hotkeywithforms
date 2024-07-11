@@ -64,9 +64,9 @@ namespace WinFormsApp1
                 if(remainingTime.TotalSeconds <= 0)
                 {
                     Console.Beep();
-                    timerState.Timer.Change(Timeout.Infinite, Timeout.Infinite); // Parar o temporizador
-                    timerState.Timer.Dispose(); // Liberar recursos do temporizador
-                    runningTimers.Remove(timerState); // Remover o temporizador da lista de temporizadores em execução
+                    timerState.Timer.Change(Timeout.Infinite, Timeout.Infinite);
+                    timerState.Timer.Dispose();
+                    runningTimers.Remove(timerState);
                     timerState.Label.BeginInvoke((MethodInvoker)delegate ()
                     {
                         timerState.Label.Text = "R";
@@ -111,5 +111,6 @@ namespace WinFormsApp1
         {
             return runningTimers.Any(t => t.Message == message);
         }
+
     }
 }
